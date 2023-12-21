@@ -28,6 +28,9 @@ public class MenuDeniedLoggingInterceptor implements AccessDeniedHandler {
 			org.springframework.security.access.AccessDeniedException accessDeniedException)
 			throws java.io.IOException, jakarta.servlet.ServletException {
 
+		logger.info("MenuDeniedLoggingInterceptor handle method called. URL: {}", request.getRequestURL());
+
+
 		String originalUrl = (String) request.getAttribute("originalUrl");    // 에러발생시 redirecting 되기 전의 URL을 가져옴
 		String menuURL = originalUrl != null ? originalUrl : request.getRequestURL().toString();
 		String userId = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "GUEST";

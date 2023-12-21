@@ -1,6 +1,10 @@
 package com.nbs.nbs.config;
 
 import com.nbs.nbs.services.common.NBSZF010_Logging.MenuDeniedLoggingInterceptor;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,10 +18,14 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.access.AccessDeniedException;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @Configuration
 @EnableWebSecurity
@@ -105,19 +113,44 @@ public class SecurityConfiguration {
             auth.anyRequest().authenticated();
 
         });
+
         http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+
+        // 필터 체인 순서 조정
         http.addFilterBefore(basicAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(refreshTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // MenuDeniedLoggingInterceptor를 다른 필터들보다 먼저 호출되도록 설정
+        http.addFilterBefore(new CustomFilter(menuDeniedLoggingInterceptor), BearerTokenAuthenticationFilter.class);
+
         http.addFilterAfter(adminRoleFilter, BearerTokenAuthenticationFilter.class);
         http.addFilterAfter(permissionFilter, BearerTokenAuthenticationFilter.class);
-        // menu 접근 권한이 없을 경우 로그를 남기기 위한 interceptor
-        http.exceptionHandling().accessDeniedHandler(menuDeniedLoggingInterceptor);
 
-        http.sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
+        // 기타 설정...
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.headers().frameOptions().sameOrigin();
+
         return http.build();
+    }
+
+    // CustomFilter 클래스 정의
+    private static class CustomFilter extends OncePerRequestFilter {
+        private final MenuDeniedLoggingInterceptor interceptor;
+
+        public CustomFilter(MenuDeniedLoggingInterceptor interceptor) {
+            this.interceptor = interceptor;
+        }
+
+        @Override
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+                throws ServletException, IOException {
+            try {
+                filterChain.doFilter(request, response);
+            } catch (AccessDeniedException e) {
+                interceptor.handle(request, response, e);
+                throw e;
+            }
+        }
     }
 
     // h2 database 사용을 위한 method
