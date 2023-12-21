@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%thread] %d{yyyy-MM-dd HH:mm:ss} [%thread] %highlight(%-5level) %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="MENU_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>logs/menulog.log</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ERROR_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>logs/errorlog.log</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+    <logger name="com.nbs.nbs.services.common.NBSZF010_Logging.MenuLoggingInterceptor" additivity="false">
+        <appender-ref ref="MENU_LOG" />
+    </logger>
+
+    <logger name="com.nbs.nbs.services.common.NBSZF010_Logging.ExceptionLoggingInterceptor" additivity="false">
+        <appender-ref ref="ERROR_LOG" />
+    </logger>
+
+    <logger name="com.nbs.nbs.services.common.NBSZF010_Logging.MenuDeniedLoggingInterceptor" additivity="false">
+        <appender-ref ref="ERROR_LOG" />
+    </logger>
+</configuration>

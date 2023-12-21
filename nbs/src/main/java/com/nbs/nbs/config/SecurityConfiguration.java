@@ -1,5 +1,6 @@
 package com.nbs.nbs.config;
 
+import com.nbs.nbs.services.common.NBSZF010_Logging.MenuDeniedLoggingInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,7 @@ public class SecurityConfiguration {
     private final RefreshTokenAuthenticationFilter refreshTokenAuthenticationFilter;
     private final PermissionFilter permissionFilter;
     private final AdminRoleFilter adminRoleFilter;
+    private final MenuDeniedLoggingInterceptor menuDeniedLoggingInterceptor;
 
     public static final String MENU_PATH = "/api/v1/menu";
     public static final String AUTH_PATH = "/api/v1/auth";
@@ -108,6 +110,8 @@ public class SecurityConfiguration {
         http.addFilterBefore(refreshTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterAfter(adminRoleFilter, BearerTokenAuthenticationFilter.class);
         http.addFilterAfter(permissionFilter, BearerTokenAuthenticationFilter.class);
+        // menu 접근 권한이 없을 경우 로그를 남기기 위한 interceptor
+        http.exceptionHandling().accessDeniedHandler(menuDeniedLoggingInterceptor);
 
         http.sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
