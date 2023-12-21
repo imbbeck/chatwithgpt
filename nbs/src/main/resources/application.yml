@@ -1,0 +1,68 @@
+spring:
+  server:
+    address: 0.0.0.0
+    port: 8080
+  logging:
+    level:
+      org.springframework.security: DEBUG
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: tsm
+    password: Tsmtech223
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+      encoding: utf-8 # 깨지는 문제
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+
+# MySQL 설정 주석 처리
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/jwt_security
+#    username: nbs_develop
+#    password: qwer1234!@#$
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#  jpa:
+#    hibernate:
+#      ddl-auto: create-drop
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        format_sql: true
+#      database: mysql
+#      database-platform: org.hibernate.dialect.MySQL8Dialect
+#    defer-datasource-initialization: true
+#  sql:
+#    init:
+#      mode: always
+#      encoding: utf-8 # 깨지는 문제
+
+application:
+  security:
+    jwt:
+      #expiration: 86400000 # a day
+      expiration: 600000 # 10 min
+      refresh-token:
+        expiration: 86400000 # seven days
+
+springdoc:
+  swagger-ui:
+    path: /doc
+    operations-sorter: method
+    tags-sorter: alpha
+    oauth:
+      app-name: NBS
+    doc-expansion: none

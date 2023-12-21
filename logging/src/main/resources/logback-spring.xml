@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%thread] %d{yyyy-MM-dd HH:mm:ss} [%thread] %highlight(%-5level) %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="MENU_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>logs/menulog.log</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ERROR_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>logs/errorlog.log</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC_ERROR_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>500</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="ERROR_LOG"/>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+    <logger name="com.example.log_test.logging.interceptor.MenuLoggingInterceptor" additivity="false">
+        <appender-ref ref="MENU_LOG" />
+    </logger>
+
+    <logger name="com.example.log_test.logging.interceptor.ExceptionLoggingInterceptor" additivity="false">
+        <appender-ref ref="ASYNC_ERROR_APPENDER" />
+    </logger>
+
+    <logger name="com.example.log_test.logging.interceptor.MenuDeniedLoggingInterceptor" additivity="false">
+        <appender-ref ref="ASYNC_ERROR_APPENDER" />
+    </logger>
+</configuration>
