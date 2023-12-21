@@ -1,6 +1,8 @@
 package com.nbs.nbs.config;
 
 import com.nbs.nbs.entity.userInfo.UserInfoRepository;
+import com.nbs.nbs.services.common.NBSZF010_Logging.ExceptionLoggingInterceptor;
+import com.nbs.nbs.services.common.NBSZF010_Logging.MenuLoggingInterceptor;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -9,6 +11,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -26,6 +29,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.security.KeyPair;
@@ -38,6 +42,19 @@ import java.util.UUID;
 @Configuration
 @EnableJpaAuditing
 public class ApplicationConfig implements WebMvcConfigurer {
+
+    // interceptors - menuAccessDeniedLoggingInterceptor는 스프링시큐리티 단에서 처리
+    @Autowired
+    private MenuLoggingInterceptor menuLoggingInterceptor;
+    @Autowired
+    private ExceptionLoggingInterceptor exceptionLoggingInterceptor;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(menuLoggingInterceptor);
+        registry.addInterceptor(exceptionLoggingInterceptor);
+    }
+
 
     // for cors
     @Override
